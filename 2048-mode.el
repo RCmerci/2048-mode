@@ -9,12 +9,59 @@
   "2048-mode key map")
 
 (defface 2048-base-face
-  '((t (:slant oblique :weight ultra-bold :underline t :background "black")))
-  "base face gor 2048"
-  :group 'basic-faces)
+  '((t (:slant oblique :weight ultra-bold :background "black")))
+  "base face gor 2048")
+(defface 2048-2-face
+  '((t (:inherit 2048-base-face :background "blue")))
+  "face for 2")
+(defface 2048-4-face
+  '((t (:inherit 2048-base-face :background "red")))
+  "face for 4")
+(defface 2048-8-face
+  '((t (:inherit 2048-base-face :background "yellow")))
+  "face for 8")
+(defface 2048-16-face
+  '((t (:inherit 2048-base-face :background "MediumPurple2")))
+  "face for 16")
+(defface 2048-32-face
+  '((t (:inherit 2048-base-face :background "plum2")))
+  "face for 32")
+(defface 2048-64-face
+  '((t (:inherit 2048-base-face :background "maroon3")))
+  "face for 64")
+(defface 2048-128-face
+  '((t (:inherit 2048-base-face :background "wheat1")))
+  "face for 128")
+(defface 2048-256-face
+  '((t (:inherit 2048-base-face :background "khaki1")))
+  "face for 256")
+(defface 2048-512-face
+  '((t (:inherit 2048-base-face :background "white")))
+  "face for 512")
+(defface 2048-1024-face
+  '((t (:inherit 2048-base-face :background "bisque")))
+  "face for 1024")
+(defface 2048-2048-face
+  '((t (:inherit 2048-base-face :background "goldenrod1")))
+  "face for 2048")
+;; (defface 2048-delimiter-face
+;;   '((t (:inherit 2048-base-face :foreground "green" :background "green")))
+;;   "分隔符")
 
 (setq 2048-keywords
-      '(("0" . '2048-base-face)))
+      '((" 2048" . '2048-2048-face)
+	(" 1024" . '2048-1024-face)
+	("  512" . '2048-512-face)
+	("  256" . '2048-256-face)
+	("  128" . '2048-128-face)
+	("   64" . '2048-64-face)
+	("   32" . '2048-32-face)
+	("   16" . '2048-16-face)
+	("    8" . '2048-8-face)
+	("    4" . '2048-4-face)
+	("    2" . '2048-2-face)
+	("    0" . '2048-base-face)))
+	;; ("-\\||" . '2048-delimiter-face)))
 
 (define-derived-mode 2048-mode fundamental-mode "2048"
   "a mode for 2048 game"
@@ -112,13 +159,18 @@
 
 (defun 2048-print-map (2048-current-map)
   (dotimes (i 4)
+    ;; (insert (make-string 26 ?-))
+    ;; (insert "\n")
     (dotimes (j 4)
-      (insert (format " %s " (nth (+ j (* 4 i)) 2048-current-map))))
+      (insert (format "%5s" (nth (+ j (* 4 i)) 2048-current-map))))
     (insert "\n")))
+  ;; (insert (make-string 26 ?-)))
 
 
 (defun 2048-generate-2-or-4 ()
-  (* 2 (1+ (random 2))))
+  (if (> (random 100) 75)
+      4
+    2))
 
 (defun 2048-get-empty-cell-randomly ();; (2048-current-map)
   (let ((2048-current-map-tmp 2048-current-map)
@@ -182,7 +234,8 @@
 	(row-4 (2048-m-n-list 12 16 2048-current-map)))
 	(fset 'aux-func (lambda (row)
 			  (let ((index 0)
-				(shrink-time 0))
+				(shrink-time 0)
+				(last-shrink-index 0))
 			    (while (and (< index 3) (< shrink-time 3))
 			      (setq fst (nth index row))
 			      (setq snd (nth (1+ index) row))
@@ -192,12 +245,14 @@
 					   (append (2048-first-n-list index row)
 						   `(,snd ,@(nthcdr (+ 2 index) row) 0)))
 				     ;; (setq index 0)
+				     (setq index last-shrink-index)
 				     (setq shrink-time (1+ shrink-time)))
 				    ((= fst snd)
 				     (setq row
 					   (append (2048-first-n-list index row)
 						   `(,(+ fst snd) ,@(nthcdr (+ 2 index) row) 0)))
 				     (setq index (1+ index))
+				     (setq last-shrink-index index)
 				     (setq shrink-time (1+ shrink-time)))
 				    ;; ((= 0 fst)
 				    ;;  (setq row
